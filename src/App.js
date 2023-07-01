@@ -57,7 +57,7 @@ const readTag = useCallback(async (
         .filter(record => record.recordType === 'text')
         .forEach(record => {
           const textDecoder = new TextDecoder(record.encoding);
-          alert(parseNote(textDecoder.decode(record.data)))
+          alert(JSON.stringify(parseNote(textDecoder.decode(record.data))))
           setNotes([...notes, parseNote(textDecoder.decode(record.data))])
         })
     });
