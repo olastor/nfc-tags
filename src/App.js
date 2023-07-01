@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './App.css';
 
 const FORMAT_VERSION = 'v1'
@@ -11,7 +11,7 @@ const COLORS = [
   '#BFD7EA'
 ]
 
-const formatNote = (note) => `${FORMAT_VERSION};${note?.color};${note.text}`
+const formatNote = note => `${FORMAT_VERSION};${note?.color};${note.text}`
 const parseNote = rawText => {
   if (rawText.startsWith(FORMAT_VERSION)) {
     const [version, color] = rawText.split(';', 2)
@@ -20,12 +20,28 @@ const parseNote = rawText => {
   }
 }
 
-
+let writeAbortController
+let readAbortController
 
 function App() {
   const [notes, setNotes] = useState([])
   const [selectedColor, setSelectedColor] = useState(COLORS[COLORS.length - 1])
   const [chosenText, setChosenText] = useState('')
+  const [isReading, setIsReading] = useState(false)
+  const [isWriting, setIsWriting] = useState(false)
+
+  useEffect(() => {
+    writeAbortController = new AbortController()
+    readAbortController = new AbortController()
+
+    writeAbortController.signal.onabort = event => {
+      setIsWriting(false)
+    }
+
+    readAbortController.signal.onabort = event => {
+      setIsReading(false)
+    }
+  }, [setIsReading, setIsWriting])
 
   const writeTag = useCallback(async () => {
     if (!notes && !notes.length) return
@@ -35,18 +51,22 @@ function App() {
         recordType: 'text',
         data: formatNote(note)
       }))
-  })}, [notes,setNotes])
+  }, { signal: writeAbortController.signal })
+    writeAbortController.abort()
+  }, [notes,setNotes])
 
-  const addNote = e => {
+  const addNote = useCallback(e => {
     if (e) e.preventDefault()
-    setNotes([...notes, { color: selectedColor, text: chosenText }])
-  }
+    setNotes(prevNotes => [...prevNotes, { color: selectedColor, text: chosenText }])
+  }, [notes,setNotes,chosenText,selectedColor])
 const readTag = useCallback(async (
 ) => {
   try {
     const ndef = new window.NDEFReader();
-    await ndef.scan();
-
+    await ndef.scan({ signal: readAbortController.signal });
+        setTimeout(() => {
+readAbortController.abort()
+        })
     setNotes([])
 
     ndef.addEventListener("readingerror", () => {
@@ -71,10 +91,24 @@ const readTag = useCallback(async (
       <button onClick={() => readTag()}>Read</button>
       <button onClick={() => writeTag()}>Write</button>
       <form onSubmit={addNote}>
+        <div className='color-select'>
         {COLORS.map(color => <div onClick={() => setSelectedColor(color)} style={{ backgroundColor: color }} className={`predefined-color${color === selectedColor ? ' selected-color' : ''}`}></div>)}
+        </div>
         <input type="text" onChange={e => setChosenText(e.target.value)} />
         <button type="submit">add note</button>
       </form>
+      {isWriting && <div>
+        <p>Writing</p>
+      <div class="indeterminate-progress-bar">
+        <div class="indeterminate-progress-bar__progress"></div>
+      </div></div>
+      }
+      {isReading && <div>
+        <p>Reading</p>
+      <div class="indeterminate-progress-bar">
+        <div class="indeterminate-progress-bar__progress"></div>
+      </div></div>
+      }
       {notes && notes.map((note, i) => <div key={`note-display-${i}`}>
         <div style={{ backgroundColor: note?.color }} className='note-color'></div>
         <div>{note?.text}</div>
