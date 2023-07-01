@@ -71,7 +71,7 @@ const readTag = useCallback(async (
       <button onClick={() => readTag()}>Read</button>
       <button onClick={() => writeTag()}>Write</button>
       <form onSubmit={addNote}>
-        {COLORS.map(color => <div style={{ backgroundColor: color }} className={`predefined-color${color === selectedColor ? ' selected-color' : ''}`}></div>)}
+        {COLORS.map(color => <div onClick={() => setSelectedColor(color)} style={{ backgroundColor: color }} className={`predefined-color${color === selectedColor ? ' selected-color' : ''}`}></div>)}
         <input type="text" onChange={e => setChosenText(e.target.value)} />
         <button type="submit">add note</button>
       </form>
