@@ -4,8 +4,14 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  pages: write
+
 jobs:
   build-and-release:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,3 +25,6 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           path: build/
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
