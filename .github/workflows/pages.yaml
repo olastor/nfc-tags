@@ -5,7 +5,9 @@ on:
     branches: [ main ]
 
 permissions:
+  contents: read
   pages: write
+  id-token: write
 
 jobs:
   build-and-release:
@@ -20,7 +22,8 @@ jobs:
         with:
           node-version: 18.x
       - run: yarn
-      - run: yarn build
+      - run: |
+          PUBLIC_URL='https://olastor.github.io/nfc-tags/' yarn build
       - name: Upload pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
