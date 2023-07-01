@@ -13,12 +13,20 @@ const readTag = async (
     });
 
     ndef.addEventListener("reading", ({ message, serialNumber }) => {
-      alert(`> Records: (${message.records.length})`);
+      message.records
+        .filter(record => record.type === 'text')
+        .forEach(record => {
+          const textDecoder = new TextDecoder(record.encoding);
+          alert(`Text: ${textDecoder.decode(record.data)} (${record.lang})`);
+        })
     });
   } catch (error) {
     alert(error.message)
   }
 }
+
+
+
 
 function App() {
   return (
