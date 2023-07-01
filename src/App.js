@@ -63,7 +63,7 @@ function App() {
   const addNote = useCallback(
     (e) => {
       if (e) e.preventDefault();
-      if (!selectedColor || !text) return;
+      if (!selectedColor || !chosenText) return;
       setNotes((prevNotes) => [
         ...prevNotes,
         { color: selectedColor, text: chosenText },
