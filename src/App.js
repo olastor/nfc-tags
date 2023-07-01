@@ -85,17 +85,21 @@ function App() {
       const ndef = new window.NDEFReader();
       setIsReading(true);
       await ndef.scan({ signal: readAbortController.signal });
-      setTimeout(() => {
-        readAbortController.abort();
-        readAbortController = new AbortController();
-      }, 3000);
       setNotes([]);
 
       ndef.addEventListener('readingerror', () => {
         console.log('error');
       });
 
+      let firstRead = false
       ndef.addEventListener('reading', ({ message, serialNumber }) => {
+        if (!firstRead) {
+          setTimeout(() => {
+            readAbortController.abort();
+            readAbortController = new AbortController();
+          }, 3000);
+          firstRead
+        }
         message.records
           .filter((record) => record.recordType === 'text')
           .forEach((record) => {
