@@ -41,7 +41,7 @@ function App() {
     if (e) e.preventDefault()
     setNotes([...notes, { color: selectedColor, text: chosenText }])
   }
-const readTag = async (
+const readTag = useCallback(async (
 ) => {
   try {
     const ndef = new window.NDEFReader();
@@ -58,13 +58,13 @@ const readTag = async (
         .filter(record => record.recordType === 'text')
         .forEach(record => {
           const textDecoder = new TextDecoder(record.encoding);
-          setNotes([...notes, parseNote(textDecoder.decode(record.data))])
+          setNotes(prevNotes => [...prevNotes, parseNote(textDecoder.decode(record.data))])
         })
     });
   } catch (error) {
     alert(error.message)
   }
-}
+}, [notes, setNotes])
 
   return (
     <div className="App">
