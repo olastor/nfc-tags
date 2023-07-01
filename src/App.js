@@ -46,6 +46,7 @@ function App() {
   const writeTag = useCallback(async () => {
     if (!notes && !notes.length) return
     const ndef = new window.NDEFReader();
+    setIsWriting(true)
     await ndef.write({
       records: notes.map(note => ({
         recordType: 'text',
@@ -63,6 +64,7 @@ const readTag = useCallback(async (
 ) => {
   try {
     const ndef = new window.NDEFReader();
+        setIsReading(true)
     await ndef.scan({ signal: readAbortController.signal });
         setTimeout(() => {
 readAbortController.abort()
