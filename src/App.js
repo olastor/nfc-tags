@@ -42,13 +42,18 @@ function App() {
 
   const writeTag = async () => {
     const ndef = new window.NDEFReader();
-    await ndef.write("Hello world!");
-    log("> Message written");
+    await ndef.write({
+    records: [
+      {
+        recordType: "text", data: "Testing123"
+      }
+    ]
+  });
   }
   return (
     <div className="App">
       <button onClick={() => readTag()}>Read</button>
-      <button>Write</button>
+      <button onClick={() => writeTag()}>Write</button>
     </div>
   );
 }
