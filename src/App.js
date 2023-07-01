@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 const FORMAT_VERSION = 'v1';
@@ -68,8 +68,16 @@ function App() {
         ...prevNotes,
         { color: selectedColor, text: chosenText },
       ]);
+      setChosenText('');
     },
-    [notes, setNotes, chosenText, selectedColor]
+    [notes, setNotes, chosenText, setChosenText, selectedColor]
+  );
+
+  const deleteNote = useCallback(
+    (i) => {
+      setNotes((prevNotes) => [...prevNotes.filter((_, j) => i !== j)]);
+    },
+    [notes, setNotes]
   );
 
   const readTag = useCallback(async () => {
@@ -111,6 +119,7 @@ function App() {
         <div className="color-select">
           {COLORS.map((color) => (
             <div
+              key={`color-pick-${color}`}
               onClick={() => setSelectedColor(color)}
               style={{ backgroundColor: color }}
               className={`predefined-color${
@@ -119,7 +128,11 @@ function App() {
             ></div>
           ))}
         </div>
-        <input type="text" onChange={(e) => setChosenText(e.target.value)} />
+        <input
+          value={chosenText}
+          type="text"
+          onChange={(e) => setChosenText(e.target.value)}
+        />
         <button type="submit">add note</button>
       </form>
       {isWriting && (
@@ -146,6 +159,7 @@ function App() {
               className="note-color"
             ></div>
             <div>{note?.text}</div>
+            <button onClick={() => deleteNote(i)}>delete</button>
           </div>
         ))}
     </div>
