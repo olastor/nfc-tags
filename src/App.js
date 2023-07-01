@@ -1,22 +1,52 @@
+import { useState, useCallback } from 'react'
 import './App.css';
 
 const FORMAT_VERSION = 'v1'
-
 const COLORS = [
   '#cc3300',
   '#ff9966',
   '#ffcc00',
   '#99cc33',
-  '#339900'
+  '#339900',
+  '#BFD7EA'
 ]
 
-const readTag = async (
-  onData,
-  onError
+const formatNote = (note) => `${FORMAT_VERSION};${note?.color};${note.text}`
+const parseNote = text => {
+  if (text.startsWith(FORMAT_VERSION)) {
+    const parts = text.split(';', 2)
+    return { color: parts[1], text: parts[2] }
+  }
+}
+
+
+
+function App() {
+  const [notes, setNotes] = useState([])
+  const [selectedColor, setSelectedColor] = useState(COLORS[COLORS.length - 1])
+  const [chosenText, setChosenText] = useState('')
+
+  const writeTag = useCallback(async () => {
+    if (!notes && !notes.length) return
+    const ndef = new window.NDEFReader();
+    await ndef.write({
+      records: notes.map(note => ({
+        recordType: 'text',
+        data: formatNote(note)
+      }))
+  })}, [notes,setNotes])
+
+  const addNote = e => {
+    if (e) e.preventDefault()
+    setNotes([...notes, { color: selectedColor, text: chosenText }])
+  }
+const readTag = useCallback(async (
 ) => {
   try {
     const ndef = new window.NDEFReader();
     await ndef.scan();
+
+    setNotes([])
 
     ndef.addEventListener("readingerror", () => {
       console.log('error')
@@ -27,33 +57,28 @@ const readTag = async (
         .filter(record => record.recordType === 'text')
         .forEach(record => {
           const textDecoder = new TextDecoder(record.encoding);
-          alert(`Text: ${textDecoder.decode(record.data)} (${record.lang})`);
+          alert(parseNote(textDecoder.decode(record.data)))
+          setNotes([...notes, parseNote(textDecoder.decode(record.data))])
         })
     });
   } catch (error) {
     alert(error.message)
   }
-}
+}, [notes, setNotes])
 
-
-
-
-function App() {
-
-  const writeTag = async () => {
-    const ndef = new window.NDEFReader();
-    await ndef.write({
-    records: [
-      {
-        recordType: "text", data: "Testing123"
-      }
-    ]
-  });
-  }
   return (
     <div className="App">
       <button onClick={() => readTag()}>Read</button>
       <button onClick={() => writeTag()}>Write</button>
+      <form onSubmit={addNote}>
+        {COLORS.map(color => <div style={{ backgroundColor: color }} className={`predefined-color${color === selectedColor ? ' selected-color' : ''}`}></div>)}
+        <input type="text" onChange={e => setChosenText(e.target.value)} />
+        <button type="submit">add note</button>
+      </form>
+      {notes && notes.map((note, i) => <div key={`note-display-${i}`}>
+        <div style={{ backgroundColor: note?.color }} className='note-color'></div>
+        <div>{note?.text}</div>
+      </div>)}
     </div>
   );
 }
