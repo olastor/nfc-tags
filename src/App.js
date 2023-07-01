@@ -66,7 +66,7 @@ const readTag = useCallback(async (
     await ndef.scan({ signal: readAbortController.signal });
         setTimeout(() => {
 readAbortController.abort()
-        })
+        }, 5000)
     setNotes([])
 
     ndef.addEventListener("readingerror", () => {
