@@ -98,7 +98,7 @@ function App() {
             readAbortController.abort();
             readAbortController = new AbortController();
           }, 3000);
-          firstRead
+          firstRead = true
         }
         message.records
           .filter((record) => record.recordType === 'text')
