@@ -13,6 +13,7 @@ const COLORS = [
 
 const formatNote = (note) => `${FORMAT_VERSION};${note?.color};${note.text}`
 const parseNote = text => {
+  alert(text)
   if (text.startsWith(FORMAT_VERSION)) {
     const [version, color] = text.split(';', 2)
     const text = text.slice(version.length + color.length + 2)
