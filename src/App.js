@@ -27,7 +27,7 @@ function App() {
   const [selectedColor, setSelectedColor] = useState(COLORS[COLORS.length - 1])
   const [chosenText, setChosenText] = useState('')
 
-  const writeTag = useCallback(async () => {
+  const writeTag = async () => {
     if (!notes && !notes.length) return
     const ndef = new window.NDEFReader();
     await ndef.write({
@@ -35,13 +35,13 @@ function App() {
         recordType: 'text',
         data: formatNote(note)
       }))
-  })}, [notes,setNotes])
+  })}
 
   const addNote = e => {
     if (e) e.preventDefault()
     setNotes([...notes, { color: selectedColor, text: chosenText }])
   }
-const readTag = useCallback(async (
+const readTag = async (
 ) => {
   try {
     const ndef = new window.NDEFReader();
@@ -65,7 +65,7 @@ const readTag = useCallback(async (
   } catch (error) {
     alert(error.message)
   }
-}, [notes, setNotes])
+}
 
   return (
     <div className="App">
