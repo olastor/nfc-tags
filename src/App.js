@@ -27,7 +27,7 @@ function App() {
   const [selectedColor, setSelectedColor] = useState(COLORS[COLORS.length - 1])
   const [chosenText, setChosenText] = useState('')
 
-  const writeTag = async () => {
+  const writeTag = useCallback(async () => {
     if (!notes && !notes.length) return
     const ndef = new window.NDEFReader();
     await ndef.write({
@@ -35,7 +35,7 @@ function App() {
         recordType: 'text',
         data: formatNote(note)
       }))
-  })}
+  })}, [notes,setNotes])
 
   const addNote = e => {
     if (e) e.preventDefault()
@@ -58,7 +58,6 @@ const readTag = async (
         .filter(record => record.recordType === 'text')
         .forEach(record => {
           const textDecoder = new TextDecoder(record.encoding);
-          alert(JSON.stringify(parseNote(textDecoder.decode(record.data))))
           setNotes([...notes, parseNote(textDecoder.decode(record.data))])
         })
     });
