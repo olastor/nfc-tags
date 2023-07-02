@@ -167,10 +167,12 @@ function App() {
             </div>
           </div>
         ))}
-      {!(isReading || isWriting || !notes || !notes.length) && (
+      {!(isReading || isWriting) && (
         <div className="action-buttons">
           <button onClick={() => readTag()}>Read</button>
-          <button onClick={() => writeTag()}>Write</button>
+          <button disabled={!notes || !notes.length} onClick={() => writeTag()}>
+            Write
+          </button>
         </div>
       )}
     </div>
