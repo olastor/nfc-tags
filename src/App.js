@@ -117,12 +117,15 @@ function App() {
 
   return (
     <div className="App">
+      <h1>NFC-Tag Reader/Writer</h1>
       <form onSubmit={addNote}>
         <div className="color-select">
           {Object.keys(COLORS).map((color) => (
             <div
               key={`color-pick-${color}`}
-              onClick={() => setSelectedColor(color)}
+              onClick={() =>
+                setSelectedColor(color === selectedColor ? '' : color)
+              }
               style={{ backgroundColor: COLORS[color] }}
               className={`predefined-color${
                 color === selectedColor ? ' selected-color' : ''
@@ -133,53 +136,43 @@ function App() {
         <input
           value={chosenText}
           type="text"
+          placeholder="Enter short text..."
           onChange={(e) => setChosenText(e.target.value)}
         />
-        <button type="submit">add note</button>
+        <button type="submit" className="add-button">
+          +
+        </button>
       </form>
-      {isWriting && (
-        <div>
-          <p>Writing</p>
-          <div className="indeterminate-progress-bar">
-            <div className="indeterminate-progress-bar__progress"></div>
-          </div>
-        </div>
-      )}
-      {isReading && (
-        <div>
-          <p>Reading</p>
-          <div className="indeterminate-progress-bar">
-            <div className="indeterminate-progress-bar__progress"></div>
-          </div>
-        </div>
-      )}
-      {notes &&
-        notes.map((note, i) => (
-          <div key={`note-display-${i}`}>
-            {note.color && (
+      <div className="list">
+        {notes &&
+          notes.map((note, i) => (
+            <div key={`note-display-${i}`} className="list-item">
               <div
-                style={{ backgroundColor: COLORS[note?.color] }}
+                style={{
+                  backgroundColor: note.color ? COLORS[note?.color] : '#fff',
+                }}
                 className="note-color"
               ></div>
-            )}
-            <div>{note?.text}</div>
-            <button onClick={() => deleteNote(i)}>delete</button>
+              <p>{note?.text}</p>
+              <button onClick={() => deleteNote(i)}>x</button>
+            </div>
+          ))}
+      </div>
+      <br />
+      {isWriting ||
+        (isReading && (
+          <div>
+            <div className="indeterminate-progress-bar">
+              <div className="indeterminate-progress-bar__progress"></div>
+            </div>
           </div>
         ))}
-      <div>
-        <button
-          disabled={isReading || isWriting || !notes || !notes.length}
-          onClick={() => readTag()}
-        >
-          Read
-        </button>
-        <button
-          disabled={isReading || isWriting || !notes || !notes.length}
-          onClick={() => writeTag()}
-        >
-          Write
-        </button>
-      </div>
+      {!(isReading || isWriting || !notes || !notes.length) && (
+        <div className="action-buttons">
+          <button onClick={() => readTag()}>Read</button>
+          <button onClick={() => writeTag()}>Write</button>
+        </div>
+      )}
     </div>
   );
 }
