@@ -2,20 +2,21 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 const COLORS = {
-  'red': '#cc3300',
-  'orange': '#ff9966',
-  'yellow': '#ffcc00',
+  red: '#cc3300',
+  orange: '#ff9966',
+  yellow: '#ffcc00',
   'light green': '#99cc33',
-  'green': '#339900',
-  'blue': '#BFD7EA'
+  green: '#339900',
+  blue: '#BFD7EA',
 };
 
-const RE_TEXT = new RegExp(`^(.+)(\\((${Object.keys(COLORS).join('|')})\\))$`)
+const RE_TEXT = new RegExp(`^(.+)(\\((${Object.keys(COLORS).join('|')})\\))$`);
 
-const formatNote = (note) => `${note.text}${note.color ? ` (${note.color})` : ''}`;
+const formatNote = (note) =>
+  `${note.text}${note.color ? ` (${note.color})` : ''}`;
 const parseNote = (rawText) => {
-  const match = rawText.match(RE_TEXT)
-  if (!match) return { color: '', text: rawText }
+  const match = rawText.match(RE_TEXT);
+  if (!match) return { color: '', text: rawText };
   return { color: match[3], text: match[1] };
 };
 
@@ -90,14 +91,14 @@ function App() {
         console.log('error');
       });
 
-      let firstRead = false
+      let firstRead = false;
       ndef.addEventListener('reading', ({ message, serialNumber }) => {
         if (!firstRead) {
           setTimeout(() => {
             readAbortController.abort();
             readAbortController = new AbortController();
           }, 3000);
-          firstRead = true
+          firstRead = true;
         }
         message.records
           .filter((record) => record.recordType === 'text')
@@ -155,17 +156,29 @@ function App() {
       {notes &&
         notes.map((note, i) => (
           <div key={`note-display-${i}`}>
-            {note.color && <div
-              style={{ backgroundColor: COLORS[note?.color] }}
-              className="note-color"
-            ></div>}
+            {note.color && (
+              <div
+                style={{ backgroundColor: COLORS[note?.color] }}
+                className="note-color"
+              ></div>
+            )}
             <div>{note?.text}</div>
             <button onClick={() => deleteNote(i)}>delete</button>
           </div>
         ))}
       <div>
-        <button disabled={isReading || isWriting || !notes || !notes.length} onClick={() => readTag()}>Read</button>
-        <button disabled={isReading || isWriting || !notes || !notes.length} onClick={() => writeTag()}>Write</button>
+        <button
+          disabled={isReading || isWriting || !notes || !notes.length}
+          onClick={() => readTag()}
+        >
+          Read
+        </button>
+        <button
+          disabled={isReading || isWriting || !notes || !notes.length}
+          onClick={() => writeTag()}
+        >
+          Write
+        </button>
       </div>
     </div>
   );
