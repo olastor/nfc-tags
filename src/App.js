@@ -1,23 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
-const FORMAT_VERSION = 'v1';
-const COLORS = [
-  '#cc3300',
-  '#ff9966',
-  '#ffcc00',
-  '#99cc33',
-  '#339900',
-  '#BFD7EA',
-];
+const COLORS = {
+  'red': '#cc3300',
+  'orange': '#ff9966',
+  'yellow': '#ffcc00',
+  'light green': '#99cc33',
+  'green': '#339900',
+  'blue': '#BFD7EA'
+};
 
-const formatNote = (note) => `${FORMAT_VERSION};${note?.color};${note.text}`;
+const RE_TEXT = new RegExp(`^(.+)(\\((${Object.keys(COLORS).join('|')})\\))$`)
+
+const formatNote = (note) => `${note.text}${note.color ? ` (${note.color})` : ''}`;
 const parseNote = (rawText) => {
-  if (rawText.startsWith(FORMAT_VERSION)) {
-    const [version, color] = rawText.split(';', 2);
-    const text = rawText.slice(version.length + color.length + 2);
-    return { color, text };
-  }
+  const match = rawText.match(RE_TEXT)
+  if (!match) return { color: '', text: rawText }
+  return { color: match[3], text: match[1] };
 };
 
 let writeAbortController;
@@ -25,7 +24,7 @@ let readAbortController;
 
 function App() {
   const [notes, setNotes] = useState([]);
-  const [selectedColor, setSelectedColor] = useState(COLORS[COLORS.length - 1]);
+  const [selectedColor, setSelectedColor] = useState('');
   const [chosenText, setChosenText] = useState('');
   const [isReading, setIsReading] = useState(false);
   const [isWriting, setIsWriting] = useState(false);
@@ -63,7 +62,7 @@ function App() {
   const addNote = useCallback(
     (e) => {
       if (e) e.preventDefault();
-      if (!selectedColor || !chosenText) return;
+      if (!chosenText) return;
       setNotes((prevNotes) => [
         ...prevNotes,
         { color: selectedColor, text: chosenText },
@@ -117,15 +116,13 @@ function App() {
 
   return (
     <div className="App">
-      <button onClick={() => readTag()}>Read</button>
-      <button onClick={() => writeTag()}>Write</button>
       <form onSubmit={addNote}>
         <div className="color-select">
-          {COLORS.map((color) => (
+          {Object.keys(COLORS).map((color) => (
             <div
               key={`color-pick-${color}`}
               onClick={() => setSelectedColor(color)}
-              style={{ backgroundColor: color }}
+              style={{ backgroundColor: COLORS[color] }}
               className={`predefined-color${
                 color === selectedColor ? ' selected-color' : ''
               }`}
@@ -158,14 +155,18 @@ function App() {
       {notes &&
         notes.map((note, i) => (
           <div key={`note-display-${i}`}>
-            <div
-              style={{ backgroundColor: note?.color }}
+            {note.color && <div
+              style={{ backgroundColor: COLORS[note?.color] }}
               className="note-color"
-            ></div>
+            ></div>}
             <div>{note?.text}</div>
             <button onClick={() => deleteNote(i)}>delete</button>
           </div>
         ))}
+      <div>
+        <button disabled={isReading || isWriting || !notes || !notes.length} onClick={() => readTag()}>Read</button>
+        <button disabled={isReading || isWriting || !notes || !notes.length} onClick={() => writeTag()}>Write</button>
+      </div>
     </div>
   );
 }
